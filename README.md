@@ -134,20 +134,23 @@
     ```bash
     sudo nano /etc/hosts
     # Ajout des lignes :
-    # 192.168.56.10  control
-    # 192.168.56.20  target01
-    # 192.168.56.30  target02
-    # 192.168.56.40  target03
+    127.0.0.1      localhost.localdomain  localhost
+    192.168.56.10  control.sandbox.lan    control
+    192.168.56.20  target01.sandbox.lan   target01
+    192.168.56.30  target02.sandbox.lan   target02
+    192.168.56.40  target03.sandbox.lan   target03
+
     ```
 
 3.  **Génération et déploiement des clés SSH :**
     Pour permettre à Ansible de se connecter sans mot de passe :
     ```bash
-    # Génération de la clé RSA (sans mot de passe)
-    ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 
     # Récupération des empreintes pour éviter les prompts de confirmation
-    ssh-keyscan target01 target02 target03 >> ~/.ssh/known_hosts
+    ssh-keyscan -t rsa target01 target02 target03 >> .ssh/know_hosts
+
+    # Génération de la clé RSA (sans mot de passe)
+    ssh-keygen
 
     # Copie de la clé publique vers les cibles (password: vagrant)
     ssh-copy-id vagrant@target01
