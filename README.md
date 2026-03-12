@@ -1,6 +1,6 @@
 # ansible-kovacs
 
-
+## INSTALLER ANSIBLE
 ##  Challenge n° 1 : Installation standard sur Ubuntu
 
 **Objectif :** Déployer une VM Ubuntu et installer Ansible via les dépôts officiels.
@@ -100,6 +100,8 @@
 5.  **Vérification :**
     ```bash
     ansible --version
+    *La version installée est la 2.15.13*
+
     ```
 
 ---
