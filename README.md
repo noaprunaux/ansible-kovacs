@@ -73,21 +73,22 @@
 
 1.  **Lancement de la VM Rocky Linux :**
     ```bash
-    mkdir atelier-03 && cd atelier-03
-    vagrant init generic/rocky9
-    vagrant up
-    vagrant ssh
+    vagrant up rocky
+    vagrant ssh rocky
     ```
 
 2.  **Installation de Python et PIP :**
     ```bash
-    sudo dnf install -y python3-pip
+    sudo dnf update
+    sudo dnf install -y epel-release
+    sudo crb enable
+    sudo dnf install -y python3-pip python3-devel
     ```
 
 3.  **Création et activation de l'environnement virtuel :**
     ```bash
     python3 -m venv ansible-env
-    source ansible-env/bin/activate
+    source ~/ansible-venv/bin/activate
     ```
 
 4.  **Installation d'Ansible via PIP :**
@@ -100,6 +101,5 @@
     ```bash
     ansible --version
     ```
-    *L'exécutable est situé dans : `/home/vagrant/ansible-env/bin/ansible`.*
 
 ---
