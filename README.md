@@ -1,28 +1,25 @@
 # ansible-kovacs
 
 
-## 🟢 Challenge n° 1 : Installation standard sur Ubuntu
+##  Challenge n° 1 : Installation standard sur Ubuntu
 
 **Objectif :** Déployer une VM Ubuntu et installer Ansible via les dépôts officiels.
 
-### 📝 Étapes de réalisation
+###  Étapes de réalisation
 
 1.  **Démarrage de la VM :**
     ```bash
-    mkdir atelier-01 && cd atelier-01
-    vagrant init generic/ubuntu2204
-    vagrant up
+    vagrant up ubuntu
     ```
 
 2.  **Connexion SSH :**
     ```bash
-    vagrant ssh
+    vagrant ssh ubuntu
     ```
 
 3.  **Mise à jour et recherche du paquet :**
     ```bash
-    sudo apt update
-    apt-cache policy ansible
+    sudo apt update && apt search --names-only ansible
     ```
 
 4.  **Installation du paquet officiel :**
@@ -34,27 +31,26 @@
     ```bash
     ansible --version
     ```
-    *Note : La version installée est généralement la version stable par défaut de la distribution (ex: 2.10.x).*
+    *La version installée est la 2.10.8*
 
 6.  **Nettoyage :**
     ```bash
     exit
-    vagrant destroy -f
+    vagrant destroy -f ubuntu
     ```
 
 ---
 
-## 🔵 Challenge n° 2 : Installation via PPA (Ubuntu)
+## Challenge n° 2 : Installation via PPA (Ubuntu)
 
 **Objectif :** Utiliser un dépôt tiers (PPA) pour obtenir une version plus récente d'Ansible.
 
-### 📝 Étapes de réalisation
+###  Étapes de réalisation
 
 1.  **Configuration du dépôt PPA :**
     Une fois connecté à la VM :
     ```bash
     sudo apt update
-    sudo apt install -y software-properties-common
     sudo add-apt-repository --yes --update ppa:ansible/ansible
     ```
 
@@ -64,16 +60,16 @@
     ```
 
 3.  **Comparaison des versions :**
-    * **Challenge 1 (Dépôt officiel) :** Version plus ancienne, privilégiant la stabilité de la distribution.
-    * **Challenge 2 (PPA) :** Version beaucoup plus récente (ex: 2.16+), permettant d'utiliser les dernières fonctionnalités d'Ansible.
+    * **Challenge 1 (Dépôt officiel) :** 2.10.8
+    * **Challenge 2 (PPA) :** 2.17.14
 
 ---
 
-## 🔴 Challenge n° 3 : Rocky Linux, PIP et Virtualenv
+##  Challenge n° 3 : Rocky Linux, PIP et Virtualenv
 
 **Objectif :** Installation isolée d'Ansible sur une distribution de type Red Hat.
 
-### 📝 Étapes de réalisation
+###  Étapes de réalisation
 
 1.  **Lancement de la VM Rocky Linux :**
     ```bash
