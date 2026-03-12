@@ -167,6 +167,25 @@
 ###  Résultat attendu
 Le module `ping` doit retourner un succès (`pong`) pour les trois machines :
 ```json
-target01 | SUCCESS => {"changed": false, "ping": "pong"}
-target02 | SUCCESS => {"changed": false, "ping": "pong"}
-target03 | SUCCESS => {"changed": false, "ping": "pong"}
+ansible all -i target01,target02,target03 -m ping
+target03 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+target02 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+target01 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
