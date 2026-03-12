@@ -105,3 +105,65 @@
 
 
 ---
+
+
+## AUTHENTIFICATION
+
+
+**Objectif :** Configurer un nœud de contrôle (`control`) pour piloter trois machines cibles (`target01`, `target02`, `target03`) via des clés SSH.
+
+### Inventaire de l'atelier
+| Machine | Rôle | Adresse IP |
+| :--- | :--- | :--- |
+| **control** | Nœud de contrôle Ansible | 192.168.56.10 |
+| **target01** | Serveur cible 1 | 192.168.56.20 |
+| **target02** | Serveur cible 2 | 192.168.56.30 |
+| **target03** | Serveur cible 3 | 192.168.56.40 |
+
+### Étapes de réalisation
+
+1.  **Démarrage de l'infrastructure :**
+    ```bash
+    cd ~/formation-ansible/atelier-03
+    vagrant up
+    vagrant ssh control
+    ```
+
+2.  **Configuration de la résolution de noms :**
+    Modification du fichier `/etc/hosts` pour mapper les adresses IP aux noms de machines :
+    ```bash
+    sudo nano /etc/hosts
+    # Ajout des lignes :
+    # 192.168.56.10  control
+    # 192.168.56.20  target01
+    # 192.168.56.30  target02
+    # 192.168.56.40  target03
+    ```
+
+3.  **Génération et déploiement des clés SSH :**
+    Pour permettre à Ansible de se connecter sans mot de passe :
+    ```bash
+    # Génération de la clé RSA (sans mot de passe)
+    ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+
+    # Récupération des empreintes pour éviter les prompts de confirmation
+    ssh-keyscan target01 target02 target03 >> ~/.ssh/known_hosts
+
+    # Copie de la clé publique vers les cibles (password: vagrant)
+    ssh-copy-id vagrant@target01
+    ssh-copy-id vagrant@target02
+    ssh-copy-id vagrant@target03
+    ```
+
+4.  **Test de connectivité avec Ansible :**
+    Exécution d'un "ping" Ansible sur l'ensemble des cibles :
+    ```bash
+    ansible all -i target01,target02,target03 -m ping
+    ```
+
+###  Résultat attendu
+Le module `ping` doit retourner un succès (`pong`) pour les trois machines :
+```json
+target01 | SUCCESS => {"changed": false, "ping": "pong"}
+target02 | SUCCESS => {"changed": false, "ping": "pong"}
+target03 | SUCCESS => {"changed": false, "ping": "pong"}
