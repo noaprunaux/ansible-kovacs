@@ -100,8 +100,8 @@
 5.  **Vérification :**
     ```bash
     ansible --version
-    *La version installée est la 2.15.13*
-
     ```
+   *La version installée est la 2.15.13*
+
 
 ---
