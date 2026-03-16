@@ -189,3 +189,300 @@ target01 | SUCCESS => {
     "changed": false,
     "ping": "pong"
 }
+
+
+# ⚙️ Configuration de base Ansible
+
+> **Objectif :** Mettre en place une structure de projet Ansible professionnelle, incluant la gestion des logs, un inventaire structuré et l'élévation de privilèges.
+
+---
+
+## Environnement
+
+| Machine | IP | Rôle |
+|---|---|---|
+| `control` | 192.168.56.10 | Control Host |
+| `target01` | 192.168.56.20 | Target Host |
+| `target02` | 192.168.56.30 | Target Host |
+| `target03` | 192.168.56.40 | Target Host |
+
+---
+
+## 1. Résolution de noms — Éditer `/etc/hosts`
+
+> **Consigne :** Éditez `/etc/hosts` de manière à ce que les Target Hosts soient joignables par leur nom d'hôte simple.
+
+```bash
+sudo nano /etc/hosts
+```
+
+Contenu ajouté :
+
+```
+127.0.0.1      localhost.localdomain  localhost
+192.168.56.10  control.sandbox.lan    control
+192.168.56.20  target01.sandbox.lan   target01
+192.168.56.30  target02.sandbox.lan   target02
+192.168.56.40  target03.sandbox.lan   target03
+```
+
+---
+
+## 2. Authentification par clé SSH
+
+> **Consigne :** Configurez l'authentification par clé SSH avec les trois Target Hosts.
+
+```bash
+# Récupération des clés hôtes
+ssh-keyscan -t rsa target01 target02 target03 >> ~/.ssh/known_hosts
+
+# Génération de la paire de clés
+ssh-keygen
+
+# Copie de la clé publique vers chaque cible
+ssh-copy-id vagrant@target01
+ssh-copy-id vagrant@target02
+ssh-copy-id vagrant@target03
+```
+
+---
+
+## 3. Installation d'Ansible
+
+> **Consigne :** Installez Ansible.
+
+```bash
+sudo apt update
+sudo apt install -y ansible
+```
+
+---
+
+## 4. Premier ping Ansible sans configuration
+
+> **Consigne :** Envoyez un premier `ping` Ansible sans configuration.
+
+```bash
+ansible all -i target01,target02,target03 -m ping
+```
+
+**Résultat :**
+
+```
+target01 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.10"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+target02 | SUCCESS => { ... "ping": "pong" }
+target03 | SUCCESS => { ... "ping": "pong" }
+```
+
+---
+
+## 5. Création du répertoire de projet
+
+> **Consigne :** Créez un répertoire de projet `~/monprojet`.
+
+```bash
+mkdir ~/monprojet
+```
+
+---
+
+## 6. Création du fichier `ansible.cfg`
+
+> **Consigne :** Créez un fichier vide `ansible.cfg` dans ce répertoire.
+
+```bash
+touch ~/monprojet/ansible.cfg
+```
+
+---
+
+## 7. Vérification de la prise en compte du fichier
+
+> **Consigne :** Vérifiez si ce fichier est bien pris en compte par Ansible.
+
+```bash
+cd ~/monprojet
+ansible --version | head -n 2
+```
+
+**Résultat :**
+
+```
+ansible [core 2.17.14]
+  config file = /home/vagrant/monprojet/ansible.cfg
+```
+
+✅ Ansible détecte bien le fichier `ansible.cfg` local au projet.
+
+---
+
+## 8. Spécification de l'inventaire `hosts`
+
+> **Consigne :** Spécifiez un inventaire nommé `hosts`.
+
+```ini
+# ~/monprojet/ansible.cfg
+[defaults]
+inventory = ./hosts
+```
+
+---
+
+## 9. Activation de la journalisation
+
+> **Consigne :** Activez la journalisation dans `~/journal/ansible.log`.
+
+```ini
+# ~/monprojet/ansible.cfg
+[defaults]
+inventory = ./hosts
+log_path = ~/journal/ansible.log
+```
+
+---
+
+## 10. Test de la journalisation
+
+> **Consigne :** Testez la journalisation.
+
+```bash
+ansible all -i target01,target02,target03 -m ping
+cat ~/journal/ansible.log
+```
+
+**Extrait du journal :**
+
+```
+2026-03-16 10:12:10,977 p=3652 u=vagrant n=ansible | target02 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.10"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+2026-03-16 10:12:11,014 p=3652 u=vagrant n=ansible | target01 | SUCCESS => {
+    ...
+    "ping": "pong"
+}
+```
+
+✅ Les logs sont bien écrits dans `~/journal/ansible.log`.
+
+---
+
+## 11. Création du groupe `[testlab]`
+
+> **Consigne :** Créez un groupe `[testlab]` avec vos trois Target Hosts.
+
+```ini
+# ~/monprojet/hosts
+[testlab]
+target01
+target02
+target03
+```
+
+---
+
+## 12. Définition de l'utilisateur de connexion
+
+> **Consigne :** Définissez explicitement l'utilisateur `vagrant` pour la connexion à vos cibles.
+
+```ini
+# ~/monprojet/hosts
+[testlab:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=vagrant
+```
+
+---
+
+## 13. Ping vers le groupe `[all]`
+
+> **Consigne :** Envoyez un `ping` Ansible vers le groupe de machines `[all]`.
+
+```bash
+ansible all -m ping
+```
+
+**Résultat :** Les trois hôtes répondent `"ping": "pong"` — SUCCESS ✅
+
+---
+
+## 14. Élévation des droits (`become`)
+
+> **Consigne :** Définissez l'élévation des droits pour l'utilisateur `vagrant` sur les Target Hosts.
+
+```ini
+# ~/monprojet/hosts
+[testlab:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=vagrant
+ansible_become=yes
+```
+
+---
+
+## 15. Affichage de la première ligne de `/etc/shadow`
+
+> **Consigne :** Affichez la première ligne du fichier `/etc/shadow` sur tous les Target Hosts.
+
+```bash
+ansible all -a "head -n 1 /etc/shadow"
+```
+
+**Résultat :**
+
+```
+target01 | CHANGED | rc=0 >>
+root:*:19977:0:99999:7:::
+target02 | CHANGED | rc=0 >>
+root:*:19977:0:99999:7:::
+target03 | CHANGED | rc=0 >>
+root:*:19977:0:99999:7:::
+```
+
+✅ L'accès au fichier `/etc/shadow` (normalement restreint à root) confirme que l'élévation de privilèges fonctionne correctement.
+
+---
+
+## 16. Nettoyage — Suppression des VM
+
+> **Consigne :** Quittez le Control Host et supprimez toutes les VM de l'atelier.
+
+```bash
+exit
+vagrant destroy -f
+```
+
+---
+
+## Fichiers de configuration finaux
+
+### `ansible.cfg`
+
+```ini
+[defaults]
+inventory = ./hosts
+log_path = ~/journal/ansible.log
+```
+
+### `hosts`
+
+```ini
+[testlab]
+target01
+target02
+target03
+
+[testlab:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=vagrant
+ansible_become=yes
+```
