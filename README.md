@@ -216,8 +216,7 @@ target01 | SUCCESS => {
 sudo nano /etc/hosts
 ```
 
-Contenu ajouté :
-
+## CONFIGURATION DE BASE
 ```
 127.0.0.1      localhost.localdomain  localhost
 192.168.56.10  control.sandbox.lan    control
@@ -318,7 +317,7 @@ ansible [core 2.17.14]
   config file = /home/vagrant/monprojet/ansible.cfg
 ```
 
-✅ Ansible détecte bien le fichier `ansible.cfg` local au projet.
+Ansible détecte bien le fichier `ansible.cfg` local au projet.
 
 ---
 
