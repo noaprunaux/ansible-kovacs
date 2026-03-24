@@ -8,6 +8,7 @@
 - [AUTHENTIFICATION](#authentification)
 - [CONFIGURATION DE BASE](#configuration-de-base)
 - [IDEMPOTENCE](#idempotence)
+- [PLAYBOOKS APACHE](#playbooks)
 
 ---
 
@@ -567,3 +568,137 @@ ansible all -m command -a "df -h /"
 ```
 
 > On remarque que les tâches sont retournées avec le statut `CHANGED`, même lorsqu'aucune modification réelle n'a eu lieu. Cela illustre la limite du module `command` qui n'est pas idempotent par nature : Ansible ne peut pas déterminer si la commande a réellement changé l'état du système.
+
+## PLAYBOOKS — Installation d'Apache
+
+**Objectif :** Écrire trois playbooks pour installer Apache sur trois distributions Linux différentes, chacune avec une page d'accueil personnalisée.
+
+---
+
+### 1. Playbook Debian — `apache-debian.yml`
+
+> **Consigne :** Installez Apache sur l'hôte `debian` avec une page personnalisée `Apache web server running on Debian Linux`.
+
+```yaml
+--- # apache-debian.yml
+- hosts: debian
+  tasks:
+    - name: Update package information
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install Apache
+      apt:
+        name: apache2
+
+    - name: Start & enable Apache
+      service:
+        name: apache2
+        state: started
+        enabled: true
+
+    - name: Apache web server on Debian
+      copy:
+        dest: /var/www/html/index.html
+        mode: 0644
+        content: |
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Test</title>
+            </head>
+            <body>
+              <h1>Apache web server running on Debian Linux</h1>
+            </body>
+          </html>
+...
+```
+
+---
+
+### 2. Playbook Rocky Linux — `apache-rocky.yml`
+
+> **Consigne :** Installez Apache sur l'hôte `rocky` avec une page personnalisée `Apache web server running on Rocky Linux`.
+
+```yaml
+--- # apache-rocky.yml
+- hosts: rocky
+  tasks:
+    - name: Install Apache
+      dnf:
+        name: httpd
+
+    - name: Start service
+      service:
+        name: httpd
+        state: started
+        enabled: true
+
+    - name: Apache web server on Rocky
+      copy:
+        dest: /var/www/html/index.html
+        mode: 0644
+        content: |
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Test</title>
+            </head>
+            <body>
+              <h1>Apache web server running on Rocky Linux</h1>
+            </body>
+          </html>
+...
+```
+
+---
+
+### 3. Playbook SUSE — `apache-suse.yml`
+
+> **Consigne :** Installez Apache sur l'hôte `suse` avec une page personnalisée `Apache web server running on SUSE Linux`.
+
+```yaml
+--- # apache-suse.yml
+- hosts: suse
+  tasks:
+    - name: Install Apache
+      zypper:
+        name: apache2
+
+    - name: Start service
+      service:
+        name: apache2
+        state: started
+        enabled: true
+
+    - name: Apache web server on Suse
+      copy:
+        dest: /srv/www/htdocs/index.html
+        mode: 0644
+        content: |
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Test</title>
+            </head>
+            <body>
+              <h1>Apache web server running on Suse Linux</h1>
+            </body>
+          </html>
+...
+```
+
+---
+
+### Points clés par distribution
+
+| Distribution | Gestionnaire de paquets | Nom du service | Répertoire web |
+|---|---|---|---|
+| Debian | `apt` | `apache2` | `/var/www/html/` |
+| Rocky Linux | `dnf` | `httpd` | `/var/www/html/` |
+| SUSE | `zypper` | `apache2` | `/srv/www/htdocs/` |
+
