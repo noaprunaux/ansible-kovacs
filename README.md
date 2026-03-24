@@ -8,7 +8,7 @@
 - [AUTHENTIFICATION](#authentification)
 - [CONFIGURATION DE BASE](#configuration-de-base)
 - [IDEMPOTENCE](#idempotence)
-- [PLAYBOOKS APACHE](#playbooks)
+- [PLAYBOOKS_APACHE](#playbooks_apache)
 
 ---
 
@@ -569,7 +569,7 @@ ansible all -m command -a "df -h /"
 
 > On remarque que les tâches sont retournées avec le statut `CHANGED`, même lorsqu'aucune modification réelle n'a eu lieu. Cela illustre la limite du module `command` qui n'est pas idempotent par nature : Ansible ne peut pas déterminer si la commande a réellement changé l'état du système.
 
-## PLAYBOOKS — Installation d'Apache
+## PLAYBOOKS_APACHE
 
 **Objectif :** Écrire trois playbooks pour installer Apache sur trois distributions Linux différentes, chacune avec une page d'accueil personnalisée.
 
