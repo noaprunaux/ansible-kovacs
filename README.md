@@ -7,6 +7,7 @@
 - [INSTALLER ANSIBLE](#installer-ansible)
 - [AUTHENTIFICATION](#authentification)
 - [CONFIGURATION DE BASE](#configuration-de-base)
+- [IDEMPOTENCE](#idempotence)
 
 ---
 
@@ -511,3 +512,58 @@ ansible_python_interpreter=/usr/bin/python3
 ansible_user=vagrant
 ansible_become=yes
 ```
+
+---
+
+## IDEMPOTENCE
+
+### 1. Installation de paquets
+
+> **Consigne :** Installez successivement les paquets `tree`, `git` et `nmap` sur toutes les cibles.
+
+```bash
+ansible all -m package -a "name=tree,git,nmap"
+```
+
+---
+
+### 2. Désinstallation de paquets
+
+> **Consigne :** Désinstallez ces trois paquets en utilisant le paramètre supplémentaire `state=absent`.
+
+```bash
+ansible all -m package -a "name=tree,git,nmap state=absent"
+```
+
+---
+
+### 3. Copie d'un fichier vers les cibles
+
+> **Consigne :** Copiez le fichier `/etc/fstab` du Control Host vers tous les Target Hosts sous forme d'un fichier `/tmp/test3.txt`.
+
+```bash
+ansible all -m file -a "dest=/tmp/test state=directory"
+ansible all -m copy -a "src=/etc/fstab dest=/tmp/test3.txt"
+```
+
+---
+
+### 4. Suppression du fichier copié
+
+> **Consigne :** Supprimez le fichier `/tmp/test3.txt` sur les Target Hosts en utilisant le module `file` avec le paramètre `state=absent`.
+
+```bash
+ansible all -m file -a "path=/tmp/test3.txt state=absent"
+```
+
+---
+
+### 5. Affichage de l'espace disque
+
+> **Consigne :** Affichez l'espace utilisé par la partition principale sur tous les Target Hosts. Que remarquez-vous ?
+
+```bash
+ansible all -m command -a "df -h /"
+```
+
+> On remarque que les tâches sont retournées avec le statut `CHANGED`, même lorsqu'aucune modification réelle n'a eu lieu. Cela illustre la limite du module `command` qui n'est pas idempotent par nature : Ansible ne peut pas déterminer si la commande a réellement changé l'état du système.
