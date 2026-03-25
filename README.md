@@ -10,6 +10,7 @@
 - [IDEMPOTENCE](#idempotence)
 - [PLAYBOOKS_APACHE](#playbooks_apache)
 - [HANDLERS](#handlers)
+- [VARIABLES](#variables)
 
 ---
 
@@ -214,6 +215,21 @@ target02 | SUCCESS => {
     "ping": "pong"
 }
 target03 | SUCCESS => {
+
+Écrivez un playbook myvars1.yml qui affiche respectivement votre voiture et votre moto préférée en utilisant le module debug et deux variables mycar et mybike définies en tant que play vars.
+
+En utilisant les extra vars, remplacez successivement l'une et l'autre marque - puis les deux à la fois - avant d'exécuter le play.
+
+Écrivez un playbook myvars2.yml qui fait essentiellement la même chose que myvars1.yml, mais en utilisant une tâche avec set_fact pour définir les deux variables.
+
+Là aussi, essayez de remplacer les deux variables en utilisant des extra vars avant l'exécution du play.
+
+Écrivez un playbook myvars3.yml qui affiche le contenu des deux variables mycar et mybike mais sans les définir. Avant d'exécuter le playbook, définissez VW et BMW comme valeurs par défaut pour mycar et mybike pour tous les hôtes, en utilisant l'endroit approprié.
+
+Effectuez le nécessaire pour remplacer VW et BMW par Mercedes et Honda sur l'hôte target02.
+
+Écrivez un playbook display_user.yml qui affiche un utilisateur et son mot de passe correspondant à l'aide des variables user et password. Ces deux variables devront être saisies de manière interactive pendant l'exécution du playbook. Les valeurs par défaut seront microlinux pour user et yatahongaga pour password. Le mot de passe ne devra pas s'afficher pendant la saisie.
+
     "ansible_facts": {
         "discovered_interpreter_python": "/usr/bin/python3"
     },
@@ -808,3 +824,232 @@ target03   : ok=3    changed=0    unreachable=0    failed=0    skipped=0
 ```
 
 > Le playbook est **idempotent** : le handler `Reload Chrony` n'est exécuté que si le fichier de configuration a réellement été modifié. Lors de la 2ème exécution, aucun changement n'est détecté et le service n'est pas redémarré inutilement.
+
+
+## VARIABLES
+
+**Objectif :** Découvrir les différentes façons de définir et d'utiliser des variables dans Ansible : play vars, set_fact, group_vars, host_vars, extra vars et vars_prompt.
+
+---
+
+### 1. Play vars — `myvars1.yml`
+
+> **Consigne :** Écrivez un playbook `myvars1.yml` qui affiche votre voiture et votre moto préférée en utilisant le module `debug` et deux variables `mycar` et `mybike` définies en tant que play vars. En utilisant les extra vars, remplacez successivement l'une et l'autre marque avant d'exécuter le play.
+
+```yaml
+---  # myvars1.yml
+
+- hosts: localhost
+  gather_facts: false
+
+  vars:
+    mycar: Aston Martin DBS
+    mybike: Suzuki GSXR 1000
+
+  tasks:
+    - debug:
+        msg: "My car is: {{mycar}} and my bike is: {{mybike}}"
+...
+```
+
+**Exécution standard :**
+
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is: Aston Martin DBS and my bike is: Suzuki GSXR 1000"
+}
+```
+
+**Remplacement de `mycar` via extra var :**
+
+```bash
+ansible-playbook myvars1.yml -e mycar="Peugeot_406"
+```
+
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is: Peugeot_406 and my bike is: Suzuki GSXR 1000"
+}
+```
+
+**Remplacement de `mybike` via extra var :**
+
+```bash
+ansible-playbook myvars1.yml -e mybike="Peugeot_103"
+```
+
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is: Aston Martin DBS and my bike is: Peugeot_103"
+}
+```
+
+---
+
+### 2. Set_fact — `myvars2.yml`
+
+> **Consigne :** Écrivez un playbook `myvars2.yml` qui fait essentiellement la même chose que `myvars1.yml`, mais en utilisant une tâche avec `set_fact` pour définir les deux variables. Essayez de remplacer les deux variables en utilisant des extra vars avant l'exécution du play.
+
+```yaml
+---  # myvars2.yml
+
+- hosts: localhost
+  gather_facts: false
+
+  tasks:
+
+    - name: Define variables
+      set_fact:
+        mycar: Aston Martin DBS
+        mybike: Suzuki GSXR 1000
+
+    - debug:
+        msg: "My car is {{mycar}} and my bike is {{mybike}}"
+...
+```
+
+**Exécution standard :**
+
+```
+TASK [Define variables] ************************************************************
+ok: [localhost]
+
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is Aston Martin DBS and my bike is Suzuki GSXR 1000"
+}
+```
+
+**Remplacement de `mycar` via extra var :**
+
+```bash
+ansible-playbook myvars2.yml -e mycar="Peugeot_208"
+```
+
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is Peugeot_208 and my bike is Suzuki GSXR 1000"
+}
+```
+
+**Remplacement de `mybike` via extra var :**
+
+```bash
+ansible-playbook myvars2.yml -e mybike="Peugeot_104"
+```
+
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is Aston Martin DBS and my bike is Peugeot_104"
+}
+```
+
+---
+
+### 3. Group vars & Host vars — `myvars3.yml`
+
+> **Consigne :** Écrivez un playbook `myvars3.yml` qui affiche le contenu des deux variables `mycar` et `mybike` sans les définir dans le playbook. Définissez VW et BMW comme valeurs par défaut pour tous les hôtes via `group_vars`, puis remplacez ces valeurs par Mercedes et Honda uniquement sur `target02` via `host_vars`.
+
+**Playbook :**
+
+```yaml
+---  # myvars3.yml
+
+- hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - debug:
+        msg: "My car is {{mycar}} and my bike is {{mybike}}"
+...
+```
+
+**Valeurs par défaut pour tous les hôtes — `group_vars/all.yml` :**
+
+```yaml
+---  # group_vars/all.yml
+
+mycar: VW
+mybike: BMW
+...
+```
+
+**Valeurs spécifiques pour `target02` — `host_vars/target02.yml` :**
+
+```yaml
+---  # host_vars/target02.yml
+
+mycar: Mercedes
+mybike: Honda
+...
+```
+
+**Résultat :**
+
+```
+TASK [debug] ***********************************************************************
+ok: [target01] => {
+    "msg": "My car is VW and my bike is BMW"
+}
+ok: [target02] => {
+    "msg": "My car is Mercedes and my bike is Honda"
+}
+ok: [target03] => {
+    "msg": "My car is VW and my bike is BMW"
+}
+```
+
+> `target02` utilise ses propres valeurs définies dans `host_vars`, qui ont priorité sur `group_vars`.
+
+---
+
+### 4. Vars prompt — `display_user.yml`
+
+> **Consigne :** Écrivez un playbook `display_user.yml` qui affiche un utilisateur et son mot de passe via les variables `user` et `password`, saisies de manière interactive. Les valeurs par défaut seront `microlinux` et `yatahongaga`. Le mot de passe ne doit pas s'afficher pendant la saisie (`private: true`).
+
+```yaml
+---  # display_user.yml
+
+- hosts: localhost
+  gather_facts: false
+
+  vars_prompt:
+
+    - name: user
+      prompt: Please write your name
+      default: microlinux
+      private: false
+
+    - name: password
+      prompt: Please write your password (secret)
+      default: yatahongaga
+      private: true
+
+  tasks:
+    - debug:
+        msg: "Your name is {{user}} and your password is {{password}}"
+...
+```
+
+**Exécution :**
+
+```bash
+ansible-playbook display_user.yml
+```
+
+```
+Please write your name [microlinux]: Noa
+Please write your password (secret) [yatahongaga]:
+
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "Your name is Noa and your password is root"
+}
+```
+
+> Le champ mot de passe n'affiche rien pendant la saisie grâce à `private: true`.
