@@ -703,7 +703,7 @@ ansible all -m command -a "df -h /"
 | Rocky Linux | `dnf` | `httpd` | `/var/www/html/` |
 | SUSE | `zypper` | `apache2` | `/srv/www/htdocs/` |
 
-## HANDLERS — Synchronisation NTP avec Chrony
+## HANDLERS
 
 **Objectif :** Écrire un playbook `chrony.yml` qui assure la synchronisation NTP de tous les Target Hosts, en utilisant un handler pour recharger le service uniquement en cas de changement de configuration.
 
