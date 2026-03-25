@@ -9,6 +9,7 @@
 - [CONFIGURATION DE BASE](#configuration-de-base)
 - [IDEMPOTENCE](#idempotence)
 - [PLAYBOOKS_APACHE](#playbooks_apache)
+- [HANDLERS](#handlers)
 
 ---
 
@@ -702,3 +703,108 @@ ansible all -m command -a "df -h /"
 | Rocky Linux | `dnf` | `httpd` | `/var/www/html/` |
 | SUSE | `zypper` | `apache2` | `/srv/www/htdocs/` |
 
+## HANDLERS — Synchronisation NTP avec Chrony
+
+**Objectif :** Écrire un playbook `chrony.yml` qui assure la synchronisation NTP de tous les Target Hosts, en utilisant un handler pour recharger le service uniquement en cas de changement de configuration.
+
+### Étapes de réalisation
+
+> **Consigne :** Installez le paquet `chrony`, activez et démarrez le service `chronyd`, installez une configuration personnalisée et prenez-la en compte via un handler.
+
+```yaml
+---  # chrony.yml
+- hosts: redhat
+  tasks:
+    - name: Install package chrony
+      dnf:
+        name: chrony
+
+    - name: Install configuration
+      copy:
+        dest: /etc/chrony.conf
+        content: |
+          # /etc/chrony.conf
+          server 0.fr.pool.ntp.org iburst
+          server 1.fr.pool.ntp.org iburst
+          server 2.fr.pool.ntp.org iburst
+          server 3.fr.pool.ntp.org iburst
+          driftfile /var/lib/chrony/drift
+          makestep 1.0 3
+          rtcsync
+          logdir /var/log/chrony
+      notify: Reload Chrony
+
+  handlers:
+    - name: Reload Chrony
+      service:
+        name: chronyd
+        state: restarted
+...
+```
+
+---
+
+### Résultat — 1ère exécution
+
+La configuration étant nouvelle, la tâche `Install configuration` est `changed` et déclenche le handler `Reload Chrony` :
+
+```
+PLAY [redhat] ***************************************************************
+
+TASK [Gathering Facts] ******************************************************
+ok: [target01]
+ok: [target02]
+ok: [target03]
+
+TASK [Install package chrony] ***********************************************
+ok: [target01]
+ok: [target02]
+ok: [target03]
+
+TASK [Install configuration] ************************************************
+changed: [target01]
+changed: [target02]
+changed: [target03]
+
+RUNNING HANDLER [Reload Chrony] *********************************************
+changed: [target01]
+changed: [target02]
+changed: [target03]
+
+PLAY RECAP ******************************************************************
+target01   : ok=4    changed=2    unreachable=0    failed=0    skipped=0
+target02   : ok=4    changed=2    unreachable=0    failed=0    skipped=0
+target03   : ok=4    changed=2    unreachable=0    failed=0    skipped=0
+```
+
+---
+
+### Résultat — 2ème exécution (idempotence)
+
+La configuration est déjà en place, aucune tâche ne change — le handler **n'est pas déclenché** :
+
+```
+PLAY [redhat] ***************************************************************
+
+TASK [Gathering Facts] ******************************************************
+ok: [target01]
+ok: [target02]
+ok: [target03]
+
+TASK [Install package chrony] ***********************************************
+ok: [target01]
+ok: [target02]
+ok: [target03]
+
+TASK [Install configuration] ************************************************
+ok: [target01]
+ok: [target02]
+ok: [target03]
+
+PLAY RECAP ******************************************************************
+target01   : ok=3    changed=0    unreachable=0    failed=0    skipped=0
+target02   : ok=3    changed=0    unreachable=0    failed=0    skipped=0
+target03   : ok=3    changed=0    unreachable=0    failed=0    skipped=0
+```
+
+> Le playbook est **idempotent** : le handler `Reload Chrony` n'est exécuté que si le fichier de configuration a réellement été modifié. Lors de la 2ème exécution, aucun changement n'est détecté et le service n'est pas redémarré inutilement.
