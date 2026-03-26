@@ -11,6 +11,7 @@
 - [PLAYBOOKS_APACHE](#playbooks_apache)
 - [HANDLERS](#handlers)
 - [VARIABLES](#variables)
+- [VARIABLES_ENREGISTRÉES](#variables_enregistrees)
 
 ---
 
@@ -1053,3 +1054,169 @@ ok: [localhost] => {
 ```
 
 > Le champ mot de passe n'affiche rien pendant la saisie grâce à `private: true`.
+
+## VARIABLES_ENREGISTRÉES
+
+**Objectif :** Utiliser le mot-clé `register` pour capturer la sortie de commandes shell et l'afficher via le module `debug`, avec les paramètres `msg` et `var`.
+
+---
+
+### 1. Informations noyau avec `msg` — `kernel.yml`
+
+> **Consigne :** Écrivez un playbook `kernel.yml` qui affiche les informations détaillées du noyau sur tous vos Target Hosts. Utilisez la commande `uname -a` et le module `debug` avec le paramètre `msg`.
+
+```yaml
+---  # kernel.yml
+
+- hosts: all
+  gather_facts: false
+
+  tasks:
+
+    - name: View kernel informations
+      command: uname -a
+      changed_when: false
+      register: kernel_param
+
+    - debug:
+        msg: "{{kernel_param.stdout_lines}}"
+...
+```
+
+**Résultat :**
+
+```
+TASK [View kernel informations] *************************************************************
+ok: [suse]
+ok: [rocky]
+ok: [debian]
+
+TASK [debug] ********************************************************************************
+ok: [rocky] => {
+    "msg": [
+        "Linux rocky 5.14.0-570.52.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Oct 15 13:59:22 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux"
+    ]
+}
+ok: [debian] => {
+    "msg": [
+        "Linux debian 6.1.0-40-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.153-1 (2025-09-20) x86_64 GNU/Linux"
+    ]
+}
+ok: [suse] => {
+    "msg": [
+        "Linux suse 6.4.0-150600.23.73-default #1 SMP PREEMPT_DYNAMIC Tue Oct  7 08:43:02 UTC 2025 (46f6a23) x86_64 x86_64 x86_64 GNU/Linux"
+    ]
+}
+
+PLAY RECAP **********************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
+
+---
+
+### 2. Informations noyau avec `var` — `kernel2.yml`
+
+> **Consigne :** Obtenez le même résultat en utilisant le paramètre `var` du module `debug` à la place de `msg`.
+
+```yaml
+---  # kernel2.yml
+
+- hosts: all
+  gather_facts: false
+
+  tasks:
+
+    - name: View kernel information
+      command: uname -a
+      changed_when: false
+      register: kernel_params2
+
+    - debug:
+        var: kernel_params2.stdout_lines
+...
+```
+
+**Résultat :**
+
+```
+TASK [View kernel information] **************************************************************
+ok: [debian]
+ok: [rocky]
+ok: [suse]
+
+TASK [debug] ********************************************************************************
+ok: [rocky] => {
+    "kernel_params2.stdout_lines": [
+        "Linux rocky 5.14.0-570.52.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Oct 15 13:59:22 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux"
+    ]
+}
+ok: [debian] => {
+    "kernel_params2.stdout_lines": [
+        "Linux debian 6.1.0-40-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.153-1 (2025-09-20) x86_64 GNU/Linux"
+    ]
+}
+ok: [suse] => {
+    "kernel_params2.stdout_lines": [
+        "Linux suse 6.4.0-150600.23.73-default #1 SMP PREEMPT_DYNAMIC Tue Oct  7 08:43:02 UTC 2025 (46f6a23) x86_64 x86_64 x86_64 GNU/Linux"
+    ]
+}
+
+PLAY RECAP **********************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
+
+> Différence entre `msg` et `var` : avec `msg`, la variable est interpolée dans une chaîne de caractères entre guillemets `"{{var}}"` ; avec `var`, on passe directement le nom de la variable sans guillemets ni accolades.
+
+---
+
+### 3. Nombre de paquets RPM — `packages.yml`
+
+> **Consigne :** Écrivez un playbook `packages.yml` qui affiche le nombre total de paquets RPM installés sur les hôtes `rocky` et `suse` (`rpm -qa | wc -l`).
+
+```yaml
+---  # packages.yml
+
+- hosts: rocky, suse
+  gather_facts: false
+
+  tasks:
+
+    - name: How many packages
+      shell: rpm -qa | wc -l
+      changed_when: false
+      register: rpm_count
+
+    - debug:
+        var: rpm_count.stdout_lines
+...
+```
+
+**Résultat :**
+
+```
+TASK [How many packages] ********************************************************************
+ok: [rocky]
+ok: [suse]
+
+TASK [debug] ********************************************************************************
+ok: [rocky] => {
+    "rpm_count.stdout_lines": [
+        "642"
+    ]
+}
+ok: [suse] => {
+    "rpm_count.stdout_lines": [
+        "504"
+    ]
+}
+
+PLAY RECAP **********************************************************************************
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
+
+> Le module `shell` est utilisé ici à la place de `command` car la commande contient un pipe (`|`). `changed_when: false` évite que la tâche soit marquée `CHANGED` à chaque exécution, puisqu'elle ne modifie rien sur le système.
