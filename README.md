@@ -12,6 +12,7 @@
 - [HANDLERS](#handlers)
 - [VARIABLES](#variables)
 - [VARIABLES_ENREGISTRÉES](#variables_enregistrées)
+- [FACTS](#facts)
 
 ---
 
@@ -1220,3 +1221,141 @@ suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
 ```
 
 > Le module `shell` est utilisé ici à la place de `command` car la commande contient un pipe (`|`). `changed_when: false` évite que la tâche soit marquée `CHANGED` à chaque exécution, puisqu'elle ne modifie rien sur le système.
+
+## FACTS
+
+**Objectif :** Utiliser les facts Ansible (variables système collectées automatiquement via `Gathering Facts`) pour afficher des informations sur chacun des Target Hosts.
+
+---
+
+### 1. Gestionnaire de paquets — `pkg-info.yml`
+
+> **Consigne :** Écrivez un playbook `pkg-info.yml` pour afficher le gestionnaire de paquets utilisé sur chaque hôte.
+
+```yaml
+---  # pkg-info.yml
+
+- hosts: all
+
+  tasks:
+
+    - name: Packages on distributions
+      debug:
+        msg: "{{ansible_host}} package is {{ansible_pkg_mgr}}"
+...
+```
+
+**Résultat :**
+
+```
+TASK [Gathering Facts] *************************************************************
+ok: [suse]
+ok: [rocky]
+ok: [debian]
+
+TASK [Packages on distributions] ***************************************************
+ok: [rocky] => {
+    "msg": "rocky package is dnf"
+}
+ok: [debian] => {
+    "msg": "debian package is apt"
+}
+ok: [suse] => {
+    "msg": "suse package is zypper"
+}
+
+PLAY RECAP *************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
+
+---
+
+### 2. Version de Python — `python-info.yml`
+
+> **Consigne :** Écrivez un playbook `python-info.yml` pour afficher la version de Python installée sur chaque hôte.
+
+```yaml
+---  # python-info.yml
+
+- hosts: all
+
+  tasks:
+
+    - name: Python versions on distribution
+      debug:
+        msg: "{{ansible_host}} python version is {{ansible_python_version}}"
+...
+```
+
+**Résultat :**
+
+```
+TASK [Gathering Facts] *************************************************************
+ok: [suse]
+ok: [debian]
+ok: [rocky]
+
+TASK [Python versions on distribution] *********************************************
+ok: [rocky] => {
+    "msg": "rocky python version is 3.9.21"
+}
+ok: [debian] => {
+    "msg": "debian python version is 3.11.2"
+}
+ok: [suse] => {
+    "msg": "suse python version is 3.6.15"
+}
+
+PLAY RECAP *************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
+
+---
+
+### 3. Serveurs DNS — `dns-info.yml`
+
+> **Consigne :** Écrivez un playbook `dns-info.yml` pour afficher le ou les serveurs DNS utilisés sur chaque hôte.
+
+```yaml
+---  # dns-info.yml
+
+- hosts: all
+
+  tasks:
+
+    - name: DNS on distribution
+      debug:
+        msg: "{{ansible_host}} DNS is {{ansible_dns}}"
+...
+```
+
+**Résultat :**
+
+```
+TASK [Gathering Facts] *************************************************************
+ok: [suse]
+ok: [debian]
+ok: [rocky]
+
+TASK [DNS on distribution] *********************************************************
+ok: [rocky] => {
+    "msg": "rocky DNS is {'search': ['mines-ales.fr'], 'nameservers': ['10.0.2.3']}"
+}
+ok: [debian] => {
+    "msg": "debian DNS is {'domain': 'mines-ales.fr', 'search': ['mines-ales.fr.'], 'nameservers': ['10.0.2.3']}"
+}
+ok: [suse] => {
+    "msg": "suse DNS is {'search': ['mines-ales.fr'], 'nameservers': ['10.0.2.3']}"
+}
+
+PLAY RECAP *************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
+
+> Le fact `ansible_dns` retourne un dictionnaire. On remarque que Debian inclut une clé `domain` supplémentaire absente sur Rocky et SUSE. Les facts sont collectés automatiquement au début du play via la tâche `Gathering Facts` — il n'est donc pas nécessaire de définir ces variables manuellement.
