@@ -14,6 +14,7 @@
 - [VARIABLES_ENREGISTRÉES](#variables_enregistrées)
 - [FACTS](#facts)
 - [CHRONY](#chrony)
+- [JINJA_TEMPLATES](#jinja_templates)
 
 ---
 
@@ -170,13 +171,14 @@ sudo nano /etc/hosts
 ```
 
 Contenu à ajouter :
-127.0.0.1 localhost.localdomain localhost
-192.168.56.10 control.sandbox.lan control
-192.168.56.20 target01.sandbox.lan target01
-192.168.56.30 target02.sandbox.lan target02
-192.168.56.40 target03.sandbox.lan target03
 
-text
+```
+127.0.0.1      localhost.localdomain  localhost
+192.168.56.10  control.sandbox.lan    control
+192.168.56.20  target01.sandbox.lan   target01
+192.168.56.30  target02.sandbox.lan   target02
+192.168.56.40  target03.sandbox.lan   target03
+```
 
 **3. Génération et déploiement des clés SSH :**
 
@@ -200,29 +202,30 @@ ansible all -i target01,target02,target03 -m ping
 ```
 
 **Résultat :**
+
+```
 target01 | SUCCESS => {
-"ansible_facts": {
-"discovered_interpreter_python": "/usr/bin/python3"
-},
-"changed": false,
-"ping": "pong"
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
 }
 target02 | SUCCESS => {
-"ansible_facts": {
-"discovered_interpreter_python": "/usr/bin/python3"
-},
-"changed": false,
-"ping": "pong"
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
 }
 target03 | SUCCESS => {
-"ansible_facts": {
-"discovered_interpreter_python": "/usr/bin/python3"
-},
-"changed": false,
-"ping": "pong"
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
 }
-
-text
+```
 
 ---
 
@@ -250,13 +253,14 @@ sudo nano /etc/hosts
 ```
 
 Contenu à ajouter :
-127.0.0.1 localhost.localdomain localhost
-192.168.56.10 control.sandbox.lan control
-192.168.56.20 target01.sandbox.lan target01
-192.168.56.30 target02.sandbox.lan target02
-192.168.56.40 target03.sandbox.lan target03
 
-text
+```
+127.0.0.1      localhost.localdomain  localhost
+192.168.56.10  control.sandbox.lan    control
+192.168.56.20  target01.sandbox.lan   target01
+192.168.56.30  target02.sandbox.lan   target02
+192.168.56.40  target03.sandbox.lan   target03
+```
 
 ---
 
@@ -299,11 +303,12 @@ ansible all -i target01,target02,target03 -m ping
 ```
 
 **Résultat :**
+
+```
 target01 | SUCCESS => { "changed": false, "ping": "pong" }
 target02 | SUCCESS => { "changed": false, "ping": "pong" }
 target03 | SUCCESS => { "changed": false, "ping": "pong" }
-
-text
+```
 
 ---
 
@@ -337,10 +342,11 @@ ansible --version | head -n 2
 ```
 
 **Résultat :**
-ansible [core 2.17.14]
-config file = /home/vagrant/monprojet/ansible.cfg
 
-text
+```
+ansible [core 2.17.14]
+  config file = /home/vagrant/monprojet/ansible.cfg
+```
 
 > Ansible détecte bien le fichier `ansible.cfg` local au projet.
 
@@ -381,22 +387,23 @@ cat ~/journal/ansible.log
 ```
 
 **Extrait du journal :**
+
+```
 2026-03-16 10:12:10,977 p=3652 u=vagrant n=ansible | target02 | SUCCESS => {
-"ansible_facts": {
-"discovered_interpreter_python": "/usr/bin/python3.10"
-},
-"changed": false,
-"ping": "pong"
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.10"
+    },
+    "changed": false,
+    "ping": "pong"
 }
 2026-03-16 10:12:11,014 p=3652 u=vagrant n=ansible | target01 | SUCCESS => {
-"ansible_facts": {
-"discovered_interpreter_python": "/usr/bin/python3.10"
-},
-"changed": false,
-"ping": "pong"
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.10"
+    },
+    "changed": false,
+    "ping": "pong"
 }
-
-text
+```
 
 > Les logs sont bien écrits dans `~/journal/ansible.log`.
 
@@ -464,14 +471,15 @@ ansible all -a "head -n 1 /etc/shadow"
 ```
 
 **Résultat :**
+
+```
 target01 | CHANGED | rc=0 >>
 root:*:19977:0:99999:7:::
 target02 | CHANGED | rc=0 >>
 root:*:19977:0:99999:7:::
 target03 | CHANGED | rc=0 >>
 root:*:19977:0:99999:7:::
-
-text
+```
 
 > L'accès à `/etc/shadow` (restreint à root) confirme que l'élévation de privilèges fonctionne correctement.
 
@@ -744,63 +752,65 @@ ansible all -m command -a "df -h /"
 ### Résultat — 1ère exécution
 
 La configuration étant nouvelle, la tâche `Install configuration` est `changed` et déclenche le handler `Reload Chrony` :
-PLAY [redhat] **
 
-TASK [Gathering Facts] **
+```
+PLAY [redhat] ***************************************************************
+
+TASK [Gathering Facts] ******************************************************
 ok: [target01]
 ok: [target02]
 ok: [target03]
 
-TASK [Install package chrony] **
+TASK [Install package chrony] ***********************************************
 ok: [target01]
 ok: [target02]
 ok: [target03]
 
-TASK [Install configuration] **
+TASK [Install configuration] ************************************************
 changed: [target01]
 changed: [target02]
 changed: [target03]
 
-RUNNING HANDLER [Reload Chrony] **
+RUNNING HANDLER [Reload Chrony] *********************************************
 changed: [target01]
 changed: [target02]
 changed: [target03]
 
-PLAY RECAP **
-target01 : ok=4 changed=2 unreachable=0 failed=0 skipped=0
-target02 : ok=4 changed=2 unreachable=0 failed=0 skipped=0
-target03 : ok=4 changed=2 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP ******************************************************************
+target01   : ok=4    changed=2    unreachable=0    failed=0    skipped=0
+target02   : ok=4    changed=2    unreachable=0    failed=0    skipped=0
+target03   : ok=4    changed=2    unreachable=0    failed=0    skipped=0
+```
 
 ---
 
 ### Résultat — 2ème exécution (idempotence)
 
 La configuration est déjà en place, aucune tâche ne change — le handler **n'est pas déclenché** :
-PLAY [redhat] **
 
-TASK [Gathering Facts] **
+```
+PLAY [redhat] ***************************************************************
+
+TASK [Gathering Facts] ******************************************************
 ok: [target01]
 ok: [target02]
 ok: [target03]
 
-TASK [Install package chrony] **
+TASK [Install package chrony] ***********************************************
 ok: [target01]
 ok: [target02]
 ok: [target03]
 
-TASK [Install configuration] **
+TASK [Install configuration] ************************************************
 ok: [target01]
 ok: [target02]
 ok: [target03]
 
-PLAY RECAP **
-target01 : ok=3 changed=0 unreachable=0 failed=0 skipped=0
-target02 : ok=3 changed=0 unreachable=0 failed=0 skipped=0
-target03 : ok=3 changed=0 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP ******************************************************************
+target01   : ok=3    changed=0    unreachable=0    failed=0    skipped=0
+target02   : ok=3    changed=0    unreachable=0    failed=0    skipped=0
+target03   : ok=3    changed=0    unreachable=0    failed=0    skipped=0
+```
 
 > Le playbook est **idempotent** : le handler `Reload Chrony` n'est exécuté que si le fichier de configuration a réellement été modifié. Lors de la 2ème exécution, aucun changement n'est détecté et le service n'est pas redémarré inutilement.
 
@@ -832,36 +842,39 @@ text
 ```
 
 **Exécution standard :**
-TASK [debug] **
-ok: [localhost] => {
-"msg": "My car is: Aston Martin DBS and my bike is: Suzuki GSXR 1000"
-}
 
-text
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is: Aston Martin DBS and my bike is: Suzuki GSXR 1000"
+}
+```
 
 **Remplacement de `mycar` via extra var :**
 
 ```bash
 ansible-playbook myvars1.yml -e mycar="Peugeot_406"
 ```
-TASK [debug] **
-ok: [localhost] => {
-"msg": "My car is: Peugeot_406 and my bike is: Suzuki GSXR 1000"
-}
 
-text
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is: Peugeot_406 and my bike is: Suzuki GSXR 1000"
+}
+```
 
 **Remplacement de `mybike` via extra var :**
 
 ```bash
 ansible-playbook myvars1.yml -e mybike="Peugeot_103"
 ```
-TASK [debug] **
-ok: [localhost] => {
-"msg": "My car is: Aston Martin DBS and my bike is: Peugeot_103"
-}
 
-text
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is: Aston Martin DBS and my bike is: Peugeot_103"
+}
+```
 
 ---
 
@@ -888,39 +901,42 @@ text
 ```
 
 **Exécution standard :**
-TASK [Define variables] **
+
+```
+TASK [Define variables] ************************************************************
 ok: [localhost]
 
-TASK [debug] **
+TASK [debug] ***********************************************************************
 ok: [localhost] => {
-"msg": "My car is Aston Martin DBS and my bike is Suzuki GSXR 1000"
+    "msg": "My car is Aston Martin DBS and my bike is Suzuki GSXR 1000"
 }
-
-text
+```
 
 **Remplacement de `mycar` via extra var :**
 
 ```bash
 ansible-playbook myvars2.yml -e mycar="Peugeot_208"
 ```
-TASK [debug] **
-ok: [localhost] => {
-"msg": "My car is Peugeot_208 and my bike is Suzuki GSXR 1000"
-}
 
-text
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is Peugeot_208 and my bike is Suzuki GSXR 1000"
+}
+```
 
 **Remplacement de `mybike` via extra var :**
 
 ```bash
 ansible-playbook myvars2.yml -e mybike="Peugeot_104"
 ```
-TASK [debug] **
-ok: [localhost] => {
-"msg": "My car is Aston Martin DBS and my bike is Peugeot_104"
-}
 
-text
+```
+TASK [debug] ***********************************************************************
+ok: [localhost] => {
+    "msg": "My car is Aston Martin DBS and my bike is Peugeot_104"
+}
+```
 
 ---
 
@@ -963,18 +979,19 @@ mybike: Honda
 ```
 
 **Résultat :**
-TASK [debug] **
+
+```
+TASK [debug] ***********************************************************************
 ok: [target01] => {
-"msg": "My car is VW and my bike is BMW"
+    "msg": "My car is VW and my bike is BMW"
 }
 ok: [target02] => {
-"msg": "My car is Mercedes and my bike is Honda"
+    "msg": "My car is Mercedes and my bike is Honda"
 }
 ok: [target03] => {
-"msg": "My car is VW and my bike is BMW"
+    "msg": "My car is VW and my bike is BMW"
 }
-
-text
+```
 
 > `target02` utilise ses propres valeurs définies dans `host_vars`, qui ont priorité sur `group_vars`.
 
@@ -1013,15 +1030,16 @@ text
 ```bash
 ansible-playbook display_user.yml
 ```
+
+```
 Please write your name [microlinux]: Noa
 Please write your password (secret) [yatahongaga]:
 
-TASK [debug] **
+TASK [debug] ***********************************************************************
 ok: [localhost] => {
-"msg": "Your name is Noa and your password is root"
+    "msg": "Your name is Noa and your password is root"
 }
-
-text
+```
 
 > Le champ mot de passe n'affiche rien pendant la saisie grâce à `private: true`.
 
@@ -1054,34 +1072,35 @@ text
 ```
 
 **Résultat :**
-TASK [View kernel informations] **
+
+```
+TASK [View kernel informations] *************************************************************
 ok: [suse]
 ok: [rocky]
 ok: [debian]
 
-TASK [debug] **
+TASK [debug] ********************************************************************************
 ok: [rocky] => {
-"msg": [
-"Linux rocky 5.14.0-570.52.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Oct 15 13:59:22 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux"
-]
+    "msg": [
+        "Linux rocky 5.14.0-570.52.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Oct 15 13:59:22 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux"
+    ]
 }
 ok: [debian] => {
-"msg": [
-"Linux debian 6.1.0-40-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.153-1 (2025-09-20) x86_64 GNU/Linux"
-]
+    "msg": [
+        "Linux debian 6.1.0-40-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.153-1 (2025-09-20) x86_64 GNU/Linux"
+    ]
 }
 ok: [suse] => {
-"msg": [
-"Linux suse 6.4.0-150600.23.73-default #1 SMP PREEMPT_DYNAMIC Tue Oct 7 08:43:02 UTC 2025 (46f6a23) x86_64 x86_64 x86_64 GNU/Linux"
-]
+    "msg": [
+        "Linux suse 6.4.0-150600.23.73-default #1 SMP PREEMPT_DYNAMIC Tue Oct  7 08:43:02 UTC 2025 (46f6a23) x86_64 x86_64 x86_64 GNU/Linux"
+    ]
 }
 
-PLAY RECAP **
-debian : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-rocky : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-suse : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP **********************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
 
 ---
 
@@ -1108,34 +1127,35 @@ text
 ```
 
 **Résultat :**
-TASK [View kernel information] **
+
+```
+TASK [View kernel information] **************************************************************
 ok: [debian]
 ok: [rocky]
 ok: [suse]
 
-TASK [debug] **
+TASK [debug] ********************************************************************************
 ok: [rocky] => {
-"kernel_params2.stdout_lines": [
-"Linux rocky 5.14.0-570.52.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Oct 15 13:59:22 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux"
-]
+    "kernel_params2.stdout_lines": [
+        "Linux rocky 5.14.0-570.52.1.el9_6.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Oct 15 13:59:22 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux"
+    ]
 }
 ok: [debian] => {
-"kernel_params2.stdout_lines": [
-"Linux debian 6.1.0-40-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.153-1 (2025-09-20) x86_64 GNU/Linux"
-]
+    "kernel_params2.stdout_lines": [
+        "Linux debian 6.1.0-40-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.153-1 (2025-09-20) x86_64 GNU/Linux"
+    ]
 }
 ok: [suse] => {
-"kernel_params2.stdout_lines": [
-"Linux suse 6.4.0-150600.23.73-default #1 SMP PREEMPT_DYNAMIC Tue Oct 7 08:43:02 UTC 2025 (46f6a23) x86_64 x86_64 x86_64 GNU/Linux"
-]
+    "kernel_params2.stdout_lines": [
+        "Linux suse 6.4.0-150600.23.73-default #1 SMP PREEMPT_DYNAMIC Tue Oct  7 08:43:02 UTC 2025 (46f6a23) x86_64 x86_64 x86_64 GNU/Linux"
+    ]
 }
 
-PLAY RECAP **
-debian : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-rocky : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-suse : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP **********************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
 
 > Différence entre `msg` et `var` : avec `msg`, la variable est interpolée dans une chaîne de caractères entre guillemets `"{{var}}"` ; avec `var`, on passe directement le nom de la variable sans guillemets ni accolades.
 
@@ -1164,27 +1184,28 @@ text
 ```
 
 **Résultat :**
-TASK [How many packages] **
+
+```
+TASK [How many packages] ********************************************************************
 ok: [rocky]
 ok: [suse]
 
-TASK [debug] **
+TASK [debug] ********************************************************************************
 ok: [rocky] => {
-"rpm_count.stdout_lines": [
-"642"
-]
+    "rpm_count.stdout_lines": [
+        "642"
+    ]
 }
 ok: [suse] => {
-"rpm_count.stdout_lines": [
-"504"
-]
+    "rpm_count.stdout_lines": [
+        "504"
+    ]
 }
 
-PLAY RECAP **
-rocky : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-suse : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP **********************************************************************************
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
 
 > Le module `shell` est utilisé ici à la place de `command` car la commande contient un pipe (`|`). `changed_when: false` évite que la tâche soit marquée `CHANGED` à chaque exécution, puisqu'elle ne modifie rien sur le système.
 
@@ -1212,28 +1233,29 @@ text
 ```
 
 **Résultat :**
-TASK [Gathering Facts] **
+
+```
+TASK [Gathering Facts] *************************************************************
 ok: [suse]
 ok: [rocky]
 ok: [debian]
 
-TASK [Packages on distributions] **
+TASK [Packages on distributions] ***************************************************
 ok: [rocky] => {
-"msg": "rocky package is dnf"
+    "msg": "rocky package is dnf"
 }
 ok: [debian] => {
-"msg": "debian package is apt"
+    "msg": "debian package is apt"
 }
 ok: [suse] => {
-"msg": "suse package is zypper"
+    "msg": "suse package is zypper"
 }
 
-PLAY RECAP **
-debian : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-rocky : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-suse : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP *************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
 
 ---
 
@@ -1255,28 +1277,29 @@ text
 ```
 
 **Résultat :**
-TASK [Gathering Facts] **
+
+```
+TASK [Gathering Facts] *************************************************************
 ok: [suse]
 ok: [debian]
 ok: [rocky]
 
-TASK [Python versions on distribution] **
+TASK [Python versions on distribution] *********************************************
 ok: [rocky] => {
-"msg": "rocky python version is 3.9.21"
+    "msg": "rocky python version is 3.9.21"
 }
 ok: [debian] => {
-"msg": "debian python version is 3.11.2"
+    "msg": "debian python version is 3.11.2"
 }
 ok: [suse] => {
-"msg": "suse python version is 3.6.15"
+    "msg": "suse python version is 3.6.15"
 }
 
-PLAY RECAP **
-debian : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-rocky : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-suse : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP *************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
 
 ---
 
@@ -1298,28 +1321,29 @@ text
 ```
 
 **Résultat :**
-TASK [Gathering Facts] **
+
+```
+TASK [Gathering Facts] *************************************************************
 ok: [suse]
 ok: [debian]
 ok: [rocky]
 
-TASK [DNS on distribution] **
+TASK [DNS on distribution] *********************************************************
 ok: [rocky] => {
-"msg": "rocky DNS is {'search': ['mines-ales.fr'], 'nameservers': ['10.0.2.3']}"
+    "msg": "rocky DNS is {'search': ['mines-ales.fr'], 'nameservers': ['10.0.2.3']}"
 }
 ok: [debian] => {
-"msg": "debian DNS is {'domain': 'mines-ales.fr', 'search': ['mines-ales.fr.'], 'nameservers': ['10.0.2.3']}"
+    "msg": "debian DNS is {'domain': 'mines-ales.fr', 'search': ['mines-ales.fr.'], 'nameservers': ['10.0.2.3']}"
 }
 ok: [suse] => {
-"msg": "suse DNS is {'search': ['mines-ales.fr'], 'nameservers': ['10.0.2.3']}"
+    "msg": "suse DNS is {'search': ['mines-ales.fr'], 'nameservers': ['10.0.2.3']}"
 }
 
-PLAY RECAP **
-debian : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-rocky : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-suse : ok=2 changed=0 unreachable=0 failed=0 skipped=0
-
-text
+PLAY RECAP *************************************************************************
+debian   : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+rocky    : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+suse     : ok=2    changed=0    unreachable=0    failed=0    skipped=0
+```
 
 > Le fact `ansible_dns` retourne un dictionnaire. On remarque que Debian inclut une clé `domain` supplémentaire absente sur Rocky et SUSE. Les facts sont collectés automatiquement au début du play via la tâche `Gathering Facts` — il n'est donc pas nécessaire de définir ces variables manuellement.
 
@@ -1393,7 +1417,7 @@ text
       copy:
         dest: /etc/chrony/chrony.conf
         content: |
-          # /etc/chrony.conf
+          # /etc/chrony/chrony.conf
           server 0.fr.pool.ntp.org iburst
           server 1.fr.pool.ntp.org iburst
           server 2.fr.pool.ntp.org iburst
@@ -1431,7 +1455,7 @@ text
 **`group_vars/debian.yml`** et **`group_vars/ubuntu.yml`** :
 
 ```yaml
-***
+---
 chrony_package: chrony
 chrony_service: chrony
 chrony_confdir: /etc/chrony
@@ -1441,7 +1465,7 @@ chrony_confdir: /etc/chrony
 **`group_vars/rocky.yml`** :
 
 ```yaml
-***
+---
 chrony_package: chrony
 chrony_service: chronyd
 chrony_confdir: /etc
@@ -1451,7 +1475,7 @@ chrony_confdir: /etc
 **`group_vars/suse.yml`** :
 
 ```yaml
-***
+---
 chrony_package: chrony
 chrony_service: chronyd
 chrony_confdir: /etc
@@ -1481,7 +1505,7 @@ chrony_confdir: /etc
       copy:
         dest: "{{ chrony_confdir }}/chrony.conf"
         content: |
-          # /etc/chrony.conf
+          # {{ chrony_confdir }}/chrony.conf
           server 0.fr.pool.ntp.org iburst
           server 1.fr.pool.ntp.org iburst
           server 2.fr.pool.ntp.org iburst
@@ -1501,3 +1525,267 @@ chrony_confdir: /etc
 ```
 
 > Cette approche est nettement plus élégante : un seul handler suffit car `chrony_service` résout automatiquement le bon nom selon la distribution. Le playbook ne contient plus aucune condition `when` sauf pour le `apt update`, ce qui le rend beaucoup plus lisible et maintenable.
+
+---
+
+## JINJA_TEMPLATES
+
+**Objectif :** Utiliser le module `template` et Jinja2 pour générer des fichiers de configuration personnalisés et dynamiques sur les Target Hosts, en exploitant les variables et les facts Ansible.
+
+### Concepts clés
+
+| Syntaxe Jinja2 | Rôle |
+|---|---|
+| `{{ variable }}` | Interpolation de variable |
+| `{% for ... %}` / `{% endfor %}` | Boucle |
+| `{% if ... %}` / `{% endif %}` | Condition |
+| `{# commentaire #}` | Commentaire (n'apparaît pas dans le fichier généré) |
+
+> Le module `template` fonctionne comme `copy`, mais il interprète les balises Jinja2 avant de déposer le fichier sur la cible. Il cherche ses sources dans le répertoire `templates/` à côté du playbook.
+
+---
+
+### Démonstration — Pages web personnalisées avec Apache
+
+#### `apache-03.yml` — Nom d'hôte dans la page
+
+```yaml
+---  # apache-03.yml
+- hosts: all
+  tasks:
+    - name: Install custom web page
+      template:
+        dest: "{{ apache_document_root }}/index.html"
+        mode: 0644
+        src: index-1.html.j2
+...
+```
+
+**`templates/index-1.html.j2` :**
+
+```jinja2
+{# templates/index-1.html.j2 #}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ inventory_hostname }}</title>
+  </head>
+  <body>
+    <h1>Welcome to {{ inventory_hostname }}!</h1>
+  </body>
+</html>
+```
+
+**Résultat (`curl suse`) :**
+
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>suse</title>
+  </head>
+  <body>
+    <h1>Welcome to suse!</h1>
+  </body>
+</html>
+```
+
+---
+
+#### `apache-04.yml` — Liste de tous les hôtes avec une boucle `for`
+
+```yaml
+---  # apache-04.yml
+- hosts: all
+  tasks:
+    - name: Install custom web page
+      template:
+        dest: "{{ apache_document_root }}/index.html"
+        mode: 0644
+        src: index-2.html.j2
+...
+```
+
+**`templates/index-2.html.j2` :**
+
+```jinja2
+{# templates/index-2.html.j2 #}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ inventory_hostname }}</title>
+  </head>
+  <body>
+    <h1>Welcome to {{ inventory_hostname }}!</h1>
+    <h2>Here's our team:</h2>
+    <ul>
+    {% for host in groups['all'] %}
+      <li>{{ host }}</li>
+    {% endfor %}
+    </ul>
+  </body>
+</html>
+```
+
+> La boucle `{% for host in groups['all'] %}` itère sur tous les hôtes de l'inventaire. Chaque hôte obtient ainsi une page unique (son propre titre) mais avec une liste complète de tous ses pairs — générée dynamiquement à partir de l'inventaire Ansible.
+
+---
+
+### Challenge — Configuration Chrony via template : `chrony.yml`
+
+> **Consigne :** Écrire un playbook `chrony.yml` qui installe la configuration Chrony depuis un template Jinja2. La première ligne du fichier généré doit être un commentaire indiquant le chemin complet vers le fichier (`/etc/chrony/chrony.conf` sur Debian/Ubuntu, `/etc/chrony.conf` sur RedHat/SUSE).
+
+#### Solution
+
+La clé est d'exploiter la variable `chrony_confdir` (déjà définie dans les `group_vars` de l'atelier précédent) directement dans le template pour générer le commentaire dynamiquement.
+
+**`templates/chrony.conf.j2` :**
+
+```jinja2
+{# templates/chrony.conf.j2 #}
+# {{ chrony_confdir }}/chrony.conf
+server 0.fr.pool.ntp.org iburst
+server 1.fr.pool.ntp.org iburst
+server 2.fr.pool.ntp.org iburst
+server 3.fr.pool.ntp.org iburst
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+logdir /var/log/chrony
+```
+
+**`chrony.yml` :**
+
+```yaml
+---  # chrony.yml
+
+- hosts: all
+
+  tasks:
+
+    - name: Update package information on Debian/Ubuntu
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Install Chrony
+      package:
+        name: "{{ chrony_package }}"
+
+    - name: Install configuration from template
+      template:
+        dest: "{{ chrony_confdir }}/chrony.conf"
+        src: chrony.conf.j2
+        mode: 0644
+      notify: Reload Chrony
+
+  handlers:
+    - name: Reload Chrony
+      service:
+        name: "{{ chrony_service }}"
+        state: restarted
+...
+```
+
+#### Vérification du fichier généré
+
+Sur un hôte **Debian/Ubuntu** (`chrony_confdir: /etc/chrony`) :
+
+```bash
+$ cat /etc/chrony/chrony.conf
+# /etc/chrony/chrony.conf
+server 0.fr.pool.ntp.org iburst
+server 1.fr.pool.ntp.org iburst
+server 2.fr.pool.ntp.org iburst
+server 3.fr.pool.ntp.org iburst
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+logdir /var/log/chrony
+```
+
+Sur un hôte **Rocky/SUSE** (`chrony_confdir: /etc`) :
+
+```bash
+$ cat /etc/chrony.conf
+# /etc/chrony.conf
+server 0.fr.pool.ntp.org iburst
+server 1.fr.pool.ntp.org iburst
+server 2.fr.pool.ntp.org iburst
+server 3.fr.pool.ntp.org iburst
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+logdir /var/log/chrony
+```
+
+#### Résultat d'exécution
+
+```
+PLAY [all] **************************************************************************
+
+TASK [Gathering Facts] **************************************************************
+ok: [ubuntu]
+ok: [debian]
+ok: [rocky]
+ok: [suse]
+
+TASK [Update package information on Debian/Ubuntu] **********************************
+ok: [ubuntu]
+ok: [debian]
+skipping: [rocky]
+skipping: [suse]
+
+TASK [Install Chrony] ***************************************************************
+ok: [ubuntu]
+ok: [debian]
+ok: [rocky]
+ok: [suse]
+
+TASK [Install configuration from template] ******************************************
+changed: [ubuntu]
+changed: [debian]
+changed: [rocky]
+changed: [suse]
+
+RUNNING HANDLER [Reload Chrony] *****************************************************
+changed: [ubuntu]
+changed: [debian]
+changed: [rocky]
+changed: [suse]
+
+PLAY RECAP **************************************************************************
+debian   : ok=5    changed=2    unreachable=0    failed=0    skipped=0
+rocky    : ok=4    changed=2    unreachable=0    failed=0    skipped=2
+suse     : ok=4    changed=2    unreachable=0    failed=0    skipped=2
+ubuntu   : ok=5    changed=2    unreachable=0    failed=0    skipped=0
+```
+
+#### Comparaison `copy` vs `template`
+
+| Critère | Module `copy` | Module `template` |
+|---|---|---|
+| Source | Fichier statique dans `files/` | Fichier `.j2` dans `templates/` |
+| Variables Jinja2 | Non interprétées | Interprétées avant transfert |
+| Répertoire de recherche | `files/` | `templates/` |
+| Cas d'usage | Fichiers identiques sur toutes les cibles | Fichiers personnalisés par hôte/groupe |
+
+> Le commentaire en première ligne `# {{ chrony_confdir }}/chrony.conf` est la seule modification par rapport au contenu statique de l'atelier précédent. Jinja2 substitue la variable au moment du déploiement, produisant un commentaire différent selon la distribution — sans aucune condition `when` dans le playbook.
+
+#### Structure du projet
+
+```
+playbooks/
+├── chrony.yml
+├── group_vars/
+│   ├── debian.yml        # chrony_confdir: /etc/chrony
+│   ├── ubuntu.yml        # chrony_confdir: /etc/chrony
+│   ├── rocky.yml         # chrony_confdir: /etc
+│   └── suse.yml          # chrony_confdir: /etc
+└── templates/
+    └── chrony.conf.j2
+```
