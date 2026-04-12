@@ -2,7 +2,7 @@
 
 # Ansible — Ateliers pratiques
 
-https://fr.wikipedia.org/wiki/Fichier:Logo_Mines_Al%C3%A8s.svg
+(https://fr.wikipedia.org/wiki/Fichier:Logo_Mines_Al%C3%A8s.svg)
 
 </div>
 
