@@ -54,9 +54,6 @@ ansible all -i target01,target02,target03 -m ping
 target01 | SUCCESS => { "changed": false, "ping": "pong" }
 target02 | SUCCESS => { "changed": false, "ping": "pong" }
 target03 | SUCCESS => { "changed": false, "ping": "pong" }
-
-text
-
 ---
 
 <div align="center">
