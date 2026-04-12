@@ -2,7 +2,11 @@
 
 # Ansible — Ateliers pratiques
 
-![Mines](https://upload.wikimedia.org/wikipedia/fr/3/34/Logo_Mines_Al%C3%A8s.svg)
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/IMT_Mines_Al%C3%A8s.svg/320px-IMT_Mines_Al%C3%A8s.svg.png" alt="IMT Mines Alès" width="200"/>
+
+![Ansible](https://img.shields.io/badge/Ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![Vagrant](https://img.shields.io/badge/Vagrant-1868F2?style=for-the-badge&logo=vagrant&logoColor=white)
 
 </div>
 
