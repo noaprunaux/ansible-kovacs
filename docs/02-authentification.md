@@ -48,7 +48,7 @@ ssh-copy-id vagrant@target03
 ansible all -i target01,target02,target03 -m ping
 ```
 
-**Résultat :**
+Résultat :
 target01 | SUCCESS => { "changed": false, "ping": "pong" }
 target02 | SUCCESS => { "changed": false, "ping": "pong" }
 target03 | SUCCESS => { "changed": false, "ping": "pong" }
