@@ -14,7 +14,7 @@
 
 | | |
 |---|---|
-| **Auteur** | Noa Prunaux |
+| **Auteur** | Arefan Ali Bedja & Noa Prunaux |
 | **Formation** | Microlinux — M. Kovacs |
 | **Année** | 2025 – 2026 |
 | **Distributions** | Debian · Ubuntu · Rocky Linux · SUSE |
