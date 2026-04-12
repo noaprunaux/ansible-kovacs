@@ -32,8 +32,6 @@ vagrant ssh control
 192.168.56.30 target02.sandbox.lan target02
 192.168.56.40 target03.sandbox.lan target03
 
-text
-
 **3. Génération et déploiement des clés SSH :**
 
 ```bash
